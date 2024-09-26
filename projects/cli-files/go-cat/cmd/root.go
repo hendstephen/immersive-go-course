@@ -16,6 +16,8 @@ func NewCmd() *cobra.Command {
 		Args:  cobra.MinimumNArgs(1),
 	}
 
+	nFlag := cmd.Flags().BoolP("number", "n", false, "number all output lines")
+
 	cmd.Run = func(cmd *cobra.Command, args []string) {
 		for _, path := range args {
 			stat, statErr := os.Stat(path)
@@ -32,8 +34,13 @@ func NewCmd() *cobra.Command {
 			// Read file line by line
 			scanner := bufio.NewScanner(file)
 			scanner.Split(bufio.ScanLines)
+			i := 1
 			for scanner.Scan() {
+				if *nFlag {
+					fmt.Fprintf(cmd.OutOrStdout(), "     %d  ", i)
+				}
 				fmt.Println(scanner.Text())
+				i++
 			}
 
 			if err := scanner.Err(); err != nil {
